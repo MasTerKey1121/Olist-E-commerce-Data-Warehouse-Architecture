@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  postgres:
+      image: postgres:15
+      environment:
+        POSTGRES_USER: masterkey1121
+        POSTGRES_PASSWORD: mymomiskindofhomeless
+        POSTGRES_DB: olist_warehouse
+      ports:
+        - "5433:5432"
+      volumes:
+        - ./postgres_data:/var/lib/postgresql/data
+        - ./datasets:/datasets
