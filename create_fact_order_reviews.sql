@@ -3,7 +3,6 @@ CREATE TABLE fact_order_reviews (
     order_key INT NOT NULL,              
     review_key INT NOT NULL,             
     
-    -- กำหนด Foreign Key Constraints เพื่อความถูกต้องของข้อมูล
     CONSTRAINT fk_fact_reviews_orders FOREIGN KEY (order_key) REFERENCES dim_orders (order_key),
     CONSTRAINT fk_fact_reviews_details FOREIGN KEY (review_key) REFERENCES dim_reviews (review_key)
 );
