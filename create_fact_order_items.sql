@@ -6,7 +6,16 @@ create table fact_order_items(
     shipping_limit_date TIMESTAMP NOT NULL,
     price NUMERIC(10,2) NOT NULL,
     freight_value NUMERIC(10,2) NOT NULL
+
+
+
 );
+
+
+AlTER TABLE fact_order_items
+ADD CONSTRAINT fk_fact_items_orders FOREIGN KEY (order_key) REFERENCES dim_orders (order_key),
+ADD CONSTRAINT fk_fact_items_products FOREIGN KEY (product_key) REFERENCES dim_products (product_key),
+ADD CONSTRAINT fk_fact_items_sellers FOREIGN KEY (seller_key) REFERENCES dim_sellers (seller_key);
 
 INSERT INTO fact_order_items (order_key, product_key, seller_key, shipping_limit_date, price, freight_value)
 select 
