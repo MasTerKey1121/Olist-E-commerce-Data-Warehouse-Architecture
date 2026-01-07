@@ -10,6 +10,8 @@ CREATE TABLE dim_orders (
     order_estimated_delivery_date_key INT,
     purchase_hour INT
 );
+
+
 INSERT INTO dim_orders (order_id, customer_key, order_status, 
 order_purchase_date_key, order_approved_date_key,
 order_shipped_date_key, order_delivered_date_key,
@@ -35,7 +37,7 @@ from(
 	from staging_orders so
 	join staging_customers sc on sc.customer_id  = so.customer_id 
 ) as soc
-join dim_customers dsc on dsc.customer_unique_id  = soc.customer_unique_id;
+join dim_customers dsc on dsc.customer_unique_id  = soc.customer_unique_id
 order by dsc.customer_key ASC;
 
 
