@@ -1,3 +1,6 @@
+-- 00. ล้างข้อมูลเก่าและรีเซ็ตลำดับเลข SERIAL ใหม่ทั้งหมด
+TRUNCATE TABLE dim_customers, dim_sellers, dim_products, dim_dates, dim_payments, dim_orders, dim_reviews RESTART IDENTITY CASCADE;
+
 -- 01. dim_customers
 INSERT INTO dim_customers (customer_unique_id, customer_zip_code_prefix, customer_city, customer_state)
 SELECT 
@@ -57,8 +60,8 @@ FROM staging_products sp
 LEFT JOIN staging_category_name_translation scnt 
     ON scnt.product_category_name = sp.product_category_name;
 
--- 04. dim_dates
-INSERT INTO dim_dates
+-- 04. dim_dates (รัน generate_series ก่อน แล้วค่อยใส่ค่า default 0)
+INSERT INTO dim_dates (date_key, full_date, day, month, month_name, quarter, year, day_of_week, day_name, is_weekend)
 SELECT 
     TO_CHAR(datum, 'YYYYMMDD')::INT AS date_key,
     datum AS full_date,
@@ -76,19 +79,19 @@ FROM generate_series(
     '1 day'::INTERVAL
 ) AS datum;
 
-INSERT INTO dim_dates (date_key, full_date, day, month, year)
-VALUES (0, '1900-01-01', 1, 1, 1900)
+-- ใส่แถวพิเศษสำหรับข้อมูลที่ไม่มีวันที่ (Unknown Date)
+INSERT INTO dim_dates (date_key, full_date, day, month, month_name, quarter, year, day_of_week, day_name, is_weekend)
+VALUES (0, '1900-01-01', 1, 1, 'January', 1, 1900, 1, 'Monday', FALSE)
 ON CONFLICT (date_key) DO NOTHING;
 
---  05. dim_payments
+-- 05. dim_payments
 INSERT INTO dim_payments (payment_type_name)
 SELECT payment_type 
-from staging_order_payments
+FROM staging_order_payments
 GROUP BY payment_type
 ORDER BY count(*) DESC;
 
-
--- 06. dim_orders
+-- 06. dim_orders (เชื่อมข้อมูลกับ dim_customers เพื่อเอา customer_key)
 INSERT INTO dim_orders (order_id, customer_key, order_status, 
     order_purchase_date_key, order_approved_date_key,
     order_shipped_date_key, order_delivered_date_key,
@@ -129,10 +132,8 @@ SELECT
     DATE_PART('day', review_answer_timestamp - review_creation_date) AS response_time_days,
     CASE 
         WHEN review_answer_timestamp IS NULL THEN 'No Response'
-        WHEN DATE_PART('day', review_answer_timestamp - review_creation_date) <= 1 THEN 'Fast' --response within 1 day
-        WHEN DATE_PART('day', review_answer_timestamp - review_creation_date) <= 3 THEN 'Normal' --response within 3 days
-        ELSE 'Slow' --response more than 3 days
+        WHEN DATE_PART('day', review_answer_timestamp - review_creation_date) <= 1 THEN 'Fast'
+        WHEN DATE_PART('day', review_answer_timestamp - review_creation_date) <= 3 THEN 'Normal'
+        ELSE 'Slow'
     END AS response_speed_category
-from staging_order_reviews;
-
--- End of ETL for dimension tables
+FROM staging_order_reviews;
