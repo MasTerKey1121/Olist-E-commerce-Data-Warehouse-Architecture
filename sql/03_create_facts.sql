@@ -1,5 +1,5 @@
 -- Create fact table for order items --
-CREATE TABLE fact_order_items (
+CREATE TABLE IF NOT EXISTS fact_order_items (
     order_item_key SERIAL PRIMARY KEY,
     order_key INT NOT NULL,
     product_key INT NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE fact_order_items (
 
 
 -- Create fact table for order payments --
-create table fact_order_payments(
+create table IF NOT EXISTS fact_order_payments(
     order_payment_key SERIAL PRIMARY KEY,
     order_key INT NOT NULL,
     customer_key INT NOT NULL,
@@ -33,7 +33,7 @@ create table fact_order_payments(
 
 
 -- Create fact table for order reviews --
-CREATE TABLE fact_order_reviews (
+CREATE TABLE IF NOT EXISTS fact_order_reviews (
     order_review_key SERIAL PRIMARY KEY, 
     order_key INT NOT NULL,              
     review_key INT NOT NULL,             
