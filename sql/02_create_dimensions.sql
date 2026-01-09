@@ -1,5 +1,5 @@
 -- Create dimension table for customers --
-CREATE TABLE dim_customers (
+CREATE TABLE IF NOT EXISTS dim_customers (
     customer_key SERIAL PRIMARY KEY,
     customer_unique_id CHAR(32),
     customer_zip_code_prefix CHAR(5),
@@ -8,13 +8,13 @@ CREATE TABLE dim_customers (
 );
 
 -- Create dimension table for payments --
-CREATE TABLE dim_payments (
+CREATE TABLE IF NOT EXISTS dim_payments (
     payment_type_key SERIAL PRIMARY KEY,
     payment_type_name VARCHAR(255) NOT NULL
 );
 
 -- Create dimension table for products --
-CREATE TABLE dim_products (
+CREATE TABLE IF NOT EXISTS dim_products (
     product_key SERIAL PRIMARY KEY,
     product_id CHAR(32),
     product_category_name VARCHAR(100),
@@ -26,7 +26,7 @@ CREATE TABLE dim_products (
 );
 
 -- Create dimension table for orders --
-CREATE TABLE dim_orders (
+CREATE TABLE IF NOT EXISTS dim_orders (
     order_key SERIAL PRIMARY KEY,
     order_id CHAR(32) NOT NULL,
     customer_key INT NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE dim_orders (
 );
 
 -- Create dimension table for sellers --
-CREATE TABLE dim_sellers (
+CREATE TABLE IF NOT EXISTS dim_sellers (
     seller_key SERIAL PRIMARY KEY,
     seller_id CHAR(32),
     seller_zip_code_prefix CHAR(5),
@@ -49,7 +49,7 @@ CREATE TABLE dim_sellers (
 );
 
 -- Create dimension table for dates --
-CREATE TABLE dim_dates (
+CREATE TABLE IF NOT EXISTS dim_dates (
     date_key INT PRIMARY KEY,
     full_date DATE,
     day INT,
@@ -61,7 +61,7 @@ CREATE TABLE dim_dates (
 );
 
 -- Create dimension table for reviews --
-CREATE TABLE dim_reviews(
+CREATE TABLE IF NOT EXISTS dim_reviews(
     review_key SERIAL PRIMARY KEY,
     review_id CHAR(32),
     review_score INT,
