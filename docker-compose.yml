@@ -1,13 +1,74 @@
 version: '3.8'
+
+# 1. ส่วนกำหนดค่ามาตรฐาน (Anchors)
+x-airflow-common:
+  &airflow-common
+  image: apache/airflow:2.7.1
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://masterkey1121:mymomiskindofhomeless@postgres:5432/olist_warehouse
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    _AIRFLOW_WWW_USER_USERNAME: masterkey11
+    _AIRFLOW_WWW_USER_PASSWORD: mymomiskindofhomeless
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./sql:/opt/airflow/sql # เก็บไฟล์ 01-05.sql ไว้ที่นี่
+    - ./logs:/opt/airflow/logs
+  user: "5000:0"
+  depends_on:
+    - postgres
+
 services:
   postgres:
-      image: postgres:15
-      environment:
-        POSTGRES_USER: masterkey1121
-        POSTGRES_PASSWORD: mymomiskindofhomeless
-        POSTGRES_DB: olist_warehouse
-      ports:
-        - "5433:5432"
-      volumes:
-        - ./postgres_data:/var/lib/postgresql/data
-        - ./datasets:/datasets
+    image: postgres:15
+    environment:
+      POSTGRES_USER: masterkey1121
+      POSTGRES_PASSWORD: mymomiskindofhomeless
+      POSTGRES_DB: olist_warehouse
+    ports:
+      - "5433:5432" # นอกเครื่องใช้ 5433 ในเครื่องใช้ 5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./datasets:/datasets
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8793/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+
+  airflow-init:
+    <<: *airflow-common
+    command: >
+      bash -c "
+      airflow db migrate &&
+      airflow users create \
+        --username masterkey11 \
+        --password mymomiskindofhomeless \
+        --firstname Admin \
+        --lastname User \
+        --role Admin \
+        --email banchpolch11@gmail.com
+      "
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+    depends_on:
+      - postgres
